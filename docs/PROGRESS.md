@@ -12,8 +12,8 @@ Re-orient here after a context clear. Build order: 0, 1, 2, 3, 4, **6, 5**, 7, 8
 | 6 Checkout | ✅ done | test ✅ lint ✅ tsc ✅ doctor ✅ | amount unit VERIFIED major-units in wrapper source (D22); cancel≠error; cart clears on success only |
 | 5 Animation | ✅ done | test ✅ (also with flag OFF: 124/124) lint ✅ tsc ✅ doctor ✅ | runOnJS exactly once (terminal cb); displayed-count lag; overlap by id |
 | 7 Test sweep | ✅ done | test ✅ lint ✅ tsc ✅ doctor ✅ | 161 tests; thresholds wired 90/85/90/90 global, 100% money+price+cartStore; coverage ≈96/89/95/97 |
-| 8 Perf | 🔨 next | | safe-only items; first cut if short |
-| 9 Docs | ⬜ | | |
+| 8 Perf | ✅ done | test ✅ lint ✅ tsc ✅ doctor ✅ (no code change) | safe items were already in Phase 4; hypotheses+script in docs/PERFORMANCE.md; nothing claimed measured |
+| 9 Docs | 🔨 next | | |
 
 ## Standing facts (learned, don't re-derive)
 

@@ -81,7 +81,9 @@ Paystack test cards (test mode only):
 
 ## Cosmetic
 
-12. **[U4]** On a notched device, is the header clear of the status bar? Expected: yes.
+12. **[U18]** Run the profiling script in docs/PERFORMANCE.md (4 numbers, ~5 minutes). Blocking
+    only if scrolling is visibly broken; otherwise report the numbers for the README.
+12b. **[U4]** On a notched device, is the header clear of the status bar? Expected: yes.
     File: `App.tsx` / `src/theme/theme.ts`.
 13. Layout/visual hierarchy pass: card spacing, text truncation on long titles (BookCard clamps
     at 2 lines), price alignment. Files: `src/components/*.tsx` styles.

@@ -21,4 +21,6 @@ Format: `ID | Claim | Why unverifiable | Risk if wrong | What falsifies it in <6
 | U15 | The arc reads naturally (x ease-out / y ease-in) | Aesthetic judgement needs eyes | Mechanical-looking motion | Watch one flight | Cosmetic | animation.constants.ts easing exponents |
 | U16 | Ghost is never clipped by list/screen bounds | Overlay is a navigator sibling by construction, but only a device shows clipping | Ghost cut off at card edge | Add from a card near screen edge | Animation polish (flag-safe) | App.tsx overlay mount point |
 | U17 | Badge pop triggers on landing on device timing | Jest mock timing ≠ device timing | Pop fires early/late | Watch badge as ghost lands | Cosmetic | animation.constants.ts BADGE_POP_* |
+| U18 | Home list scrolls smoothly at 500+ items | Cannot profile in sandbox | Janky browse | PERFORMANCE.md script step 2 | Browse UX | src/components/BookCard.tsx (H1), src/hooks/useBookSearch.ts (H3) |
+| U19 | Typing in search doesn't drop UI frames | Cannot profile | Janky search | PERFORMANCE.md script step 3 | Search UX | src/screens/HomeScreen.tsx (H2) |
 
