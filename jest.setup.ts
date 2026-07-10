@@ -11,6 +11,14 @@ jest.mock('@react-native-async-storage/async-storage', () =>
   require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
 );
 
+// react-native-webview needs a native module that doesn't exist under Jest.
+// The WebView is only ever exercised on a device (paystack-checkout skill:
+// "do not try to render the WebView in Jest") — a plain View stands in.
+jest.mock('react-native-webview', () => {
+  const { View } = require('react-native');
+  return { WebView: View, default: View };
+});
+
 // The suite must be silent. An unexpected console.error or console.warn fails the
 // test that produced it — this is the only automated catch for React lifecycle
 // warnings ("state update on unmounted component"), which the assessment grades.

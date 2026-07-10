@@ -23,6 +23,24 @@ export function sumKobo(amounts: readonly number[]): number {
 }
 
 /**
+ * Conversion for the Paystack wrapper (react-native-paystack-webview v5),
+ * whose `amount` is in MAJOR units — verified in its source, which multiplies
+ * by 100 before handing to InlineJS (production/lib/utils.js). We only ever
+ * pass whole-naira integers so that internal ×100 cannot drift; every price
+ * this app synthesises is a multiple of ₦100, so the guard never fires in
+ * practice — it exists to catch a future price source violating the invariant.
+ */
+export function koboToWholeNairaForPaystack(kobo: number): number {
+  assertKobo(kobo, 'kobo');
+  if (kobo % 100 !== 0) {
+    throw new TypeError(
+      `Paystack amount must be whole naira; got ${kobo} kobo which has a fractional naira part`,
+    );
+  }
+  return kobo / 100;
+}
+
+/**
  * "₦2,500" for whole-naira amounts, "₦2,500.50" when kobo are present.
  * Manual formatting — Hermes Intl.NumberFormat support varies by platform and
  * a wrong symbol on device would be invisible from this sandbox.

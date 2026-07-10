@@ -41,3 +41,12 @@ animation constants in one file; checkout built before animation.
 | D19 | Runtime payload validation | zod / hand-rolled type guards | zod is pure JS (allowed) but hides the mechanics; guards are ~20 lines | **Hand-rolled `isOLSearchResponse` / `isOLWork` guards** | No | 2026-07-10 |
 | D20 | Author names on details | route-param passthrough / resolve via /authors/*.json | Works endpoint returns refs only. Param passthrough breaks deep-linking; author fetches are parallel and degrade gracefully | **Resolve up to 3 author names in `getBookById`, best-effort** | No | 2026-07-10 |
 | D21 | Decrement at quantity 1 | floor at 1 / remove the line | Removal is the common cart idiom and keeps the stepper self-sufficient; floor-at-1 forces a separate delete affordance | **Decrementing at 1 removes the line; `setQuantity(id, 0)` removes** | **PROVISIONAL** (user was offline; reversal = one branch in cartStore + stepper) | 2026-07-10 |
+
+## Phase 6 — checkout decisions
+
+| ID | Decision | Options | Trade-off | Ruling | PROV? | Date |
+|---|---|---|---|---|---|---|
+| D22 | Paystack `amount` unit | trust docs/skill / read installed source | The wrapper's unit changed across majors; guessing risks a ×100 charge error | **Verified in installed v5.1.0 source: amount is MAJOR units (it multiplies ×100 in `production/lib/utils.js`). We pass whole naira via `koboToWholeNairaForPaystack`, which rejects non-whole-naira kobo so the wrapper's ×100 can never touch a float** | No | 2026-07-10 |
+| D23 | Reference generation | client UUID / timestamp+random / derived from cart | Derived collides on repeat purchases (skill forbids); uuid lib adds a dep for no gain | **`bn_<Date.now()>_<random36>`, fresh per payment attempt** | No | 2026-07-10 |
+| D24 | onCancel UX | share the error screen / distinct neutral note | Cancel is a user decision, not a failure; conflating reads as careless (skill) | **Cancel returns to the form with a neutral 'cart untouched' note; error gets a distinct retry screen** | No | 2026-07-10 |
+| D25 | Checkout email | require sign-in / ask at checkout | No auth in scope; Paystack requires an email for receipts | **Single validated email field on the checkout form** | No | 2026-07-10 |

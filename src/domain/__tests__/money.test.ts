@@ -1,4 +1,10 @@
-import { assertKobo, formatNaira, lineTotalKobo, sumKobo } from '../money';
+import {
+  assertKobo,
+  formatNaira,
+  koboToWholeNairaForPaystack,
+  lineTotalKobo,
+  sumKobo,
+} from '../money';
 
 // Money is the one place the assessment explicitly fears float drift. Every
 // assertion here is EXACT equality — never toBeCloseTo.
@@ -44,6 +50,27 @@ describe('sumKobo', () => {
 
   it('rejects any float member', () => {
     expect(() => sumKobo([100, 0.5])).toThrow(TypeError);
+  });
+});
+
+describe('koboToWholeNairaForPaystack', () => {
+  it('converts whole-naira kobo amounts exactly', () => {
+    expect(koboToWholeNairaForPaystack(649_800)).toBe(6498);
+    expect(koboToWholeNairaForPaystack(250_000)).toBe(2500);
+    expect(koboToWholeNairaForPaystack(0)).toBe(0);
+  });
+
+  it('proves the classic float case cannot reach Paystack: ₦1,999 × 3 in kobo', () => {
+    // 19.99 * 3 * 100 = 5997.000000000001 — but we never do that math.
+    expect(koboToWholeNairaForPaystack(199_900 * 3)).toBe(5997);
+  });
+
+  it('refuses fractional-naira amounts (the wrapper would ×100 a float)', () => {
+    expect(() => koboToWholeNairaForPaystack(250_050)).toThrow(TypeError);
+  });
+
+  it('refuses float kobo outright', () => {
+    expect(() => koboToWholeNairaForPaystack(5997.000000000001)).toThrow(TypeError);
   });
 });
 

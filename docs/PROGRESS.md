@@ -9,8 +9,8 @@ Re-orient here after a context clear. Build order: 0, 1, 2, 3, 4, **6, 5**, 7, 8
 | 2 API layer | ✅ done | test ✅ lint ✅ tsc ✅ doctor ✅ | Live-verified fixtures; redirect stubs handled (D16); Result<T> transport (D17) |
 | 3 Fetch hook | ✅ done | test ✅ lint ✅ tsc ✅ doctor ✅ | useReducer machine; race + unmount cases tested; fetcher must be useCallback-stable |
 | 4 Screens+cart | ✅ done | test ✅ lint ✅ tsc ✅ doctor ✅ | 101 tests; useBookSearch reducer owns query/page atomically; hydrated flag prevents empty-cart flash |
-| 6 Checkout | 🔨 next | | before Phase 5 |
-| 5 Animation | ⬜ | | |
+| 6 Checkout | ✅ done | test ✅ lint ✅ tsc ✅ doctor ✅ | amount unit VERIFIED major-units in wrapper source (D22); cancel≠error; cart clears on success only |
+| 5 Animation | 🔨 next | | flag FEATURE_FLYING_CART; suite must pass with flag off |
 | 7 Test sweep | ⬜ | | coverage: 85/80 global, 100% money+cart |
 | 8 Perf | ⬜ | | safe-only items; first cut if short |
 | 9 Docs | ⬜ | | |
