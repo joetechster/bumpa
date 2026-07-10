@@ -55,7 +55,29 @@ Paystack test cards (test mode only):
 11. **[U6]** Do most books show real covers (not the grey title placeholder)? Expected: yes for
     popular books. File: `src/domain/book.ts` (`coverUrlFromId` size suffix).
 
-*(animation items land here in Phase 5 — the feature flag makes them survivable)*
+**Animation (all survivable: set `FEATURE_FLYING_CART = false` in `src/config/featureFlags.ts` and ship without them):**
+
+14. **[U13]** Tap "Add to cart" on a book with a cover. Does a ghost cover lift off from THAT
+    card's cover and land on the header cart icon? Expected: yes. If the rects look wrong, set
+    `DEBUG_ANIM_RECTS = true` (same file as the flag) — red border = measured source, green =
+    target — and send a screenshot.
+15. **[U13]** Badge count increments when the ghost ARRIVES, not when you tap. Expected: yes
+    (the cart screen itself is correct immediately either way — check by opening the cart fast).
+16. **[U14]** Ten rapid adds in ~2 seconds: all ghosts fly and overlap, none freeze, count ends
+    exactly 10, no crash. Expected: yes. Tuning: `FLIGHT_DURATION_MS` in
+    `src/animation/animation.constants.ts`.
+17. **[U13]** Tap add, then IMMEDIATELY navigate (tap the book, or back). Expected: ghost
+    completes above the new screen or vanishes cleanly; no crash, no stuck overlay blocking taps,
+    cart count correct.
+18. **[U14]** With Dev Menu → Perf Monitor open, do items 14–16 on Android. Expected: UI thread
+    stays ~60fps; JS thread dips don't stutter the ghost. One-line fix if not:
+    `FLIGHT_DURATION_MS` down to ~400.
+19. Enable "Reduce Motion" in OS accessibility settings (iOS: Settings → Accessibility → Motion;
+    Android: Remove animations). Add a book. Expected: NO ghost, badge updates instantly.
+20. **[U17]** Does the badge do a quick pop (scale bounce) as the ghost lands? Expected: yes.
+    Tuning: `BADGE_POP_SCALE` / `BADGE_POP_LEG_MS`.
+21. **[U15]** Does the flight path read as a natural arc rather than a straight line? Subjective —
+    tune `GHOST_X_EASE_EXPONENT` / `GHOST_Y_EASE_EXPONENT` (2 = quadratic; higher = sharper).
 
 ## Cosmetic
 

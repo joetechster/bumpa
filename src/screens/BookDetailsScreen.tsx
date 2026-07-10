@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import {
   ActivityIndicator,
   Image,
@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 
+import { useFlyToCart } from '../animation/useFlyToCart';
 import { getBookById } from '../api/books';
 import ErrorView from '../components/ErrorView';
 import PriceTag from '../components/PriceTag';
@@ -31,6 +32,8 @@ export default function BookDetailsScreen({ route }: Props) {
   );
   const { state, retry } = useFetch(fetchBook);
   const addBook = useCartStore((s) => s.addBook);
+  const flyToCart = useFlyToCart();
+  const coverRef = useRef<View>(null);
 
   if (state.status === 'loading' || state.status === 'idle') {
     return <ActivityIndicator accessibilityLabel="Loading book details" style={styles.spinner} />;
@@ -42,18 +45,20 @@ export default function BookDetailsScreen({ route }: Props) {
   const book = state.data;
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {book.coverUrl !== null ? (
-        <Image
-          source={{ uri: book.coverUrl }}
-          style={styles.cover}
-          resizeMode="contain"
-          accessibilityLabel={`Cover of ${book.title}`}
-        />
-      ) : (
-        <View style={[styles.cover, styles.coverFallback]}>
-          <Text style={styles.coverFallbackText}>{book.title}</Text>
-        </View>
-      )}
+      <View ref={coverRef} collapsable={false}>
+        {book.coverUrl !== null ? (
+          <Image
+            source={{ uri: book.coverUrl }}
+            style={styles.cover}
+            resizeMode="contain"
+            accessibilityLabel={`Cover of ${book.title}`}
+          />
+        ) : (
+          <View style={[styles.cover, styles.coverFallback]}>
+            <Text style={styles.coverFallbackText}>{book.title}</Text>
+          </View>
+        )}
+      </View>
       <Text style={styles.title}>{book.title}</Text>
       <Text style={styles.author}>
         {book.authors.length > 0 ? book.authors.join(', ') : 'Unknown author'}
@@ -63,7 +68,10 @@ export default function BookDetailsScreen({ route }: Props) {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel={`Add ${book.title} to cart`}
-        onPress={() => addBook(book)}
+        onPress={() => {
+          addBook(book); // store first, always — the flight is decorative
+          flyToCart(coverRef, book.coverUrl);
+        }}
         style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
       >
         <Text style={styles.addButtonText}>Add to cart</Text>

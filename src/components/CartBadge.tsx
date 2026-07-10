@@ -1,35 +1,67 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useEffect, useRef } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { useSharedValue, withSequence, withTiming } from 'react-native-reanimated';
 
+import { BADGE_POP_LEG_MS, BADGE_POP_SCALE } from '../animation/animation.constants';
+import { displayedCount, useFlightController } from '../animation/flightController';
 import { cartItemCount, useCartStore } from '../store/cartStore';
 import { colors, spacing, type } from '../theme/theme';
 
-// Header cart icon + count badge. Subscribes via selector so only cart
-// changes re-render it — not every store change, not every screen render.
+// Header cart icon + count badge; also the flying animation's landing target.
 //
-// Phase 5 note: this badge will read a *displayed* count that lags the true
-// count until the flying ghost lands. Until then it tracks the store directly.
+// The count shown is the DISPLAYED count: true store count minus ghosts still
+// in the air — the number increments when a ghost lands, not on tap (the
+// store itself updated on tap; this is presentation lag only). With the
+// feature flag off or reduced motion on there are never ghosts, so the badge
+// tracks the store instantly. The pop animation runs on the UI thread via a
+// shared value; JS only decides WHEN to pop.
 
 interface Props {
   onPress: () => void;
 }
 
 export default function CartBadge({ onPress }: Props) {
-  const count = useCartStore((state) => cartItemCount(state.lines));
+  const trueCount = useCartStore((state) => cartItemCount(state.lines));
+  const { flights, registerCartTarget } = useFlightController();
+  const shown = displayedCount(trueCount, flights.length);
+
+  const containerRef = useRef<View>(null);
+  const scale = useSharedValue(1);
+  const previousShown = useRef(shown);
+
+  useEffect(() => {
+    if (shown > previousShown.current) {
+      scale.value = withSequence(
+        withTiming(BADGE_POP_SCALE, { duration: BADGE_POP_LEG_MS }),
+        withTiming(1, { duration: BADGE_POP_LEG_MS }),
+      );
+    }
+    previousShown.current = shown;
+  }, [shown, scale]);
 
   return (
     <Pressable
+      ref={containerRef}
       accessibilityRole="button"
-      accessibilityLabel={`Open cart, ${count} ${count === 1 ? 'item' : 'items'}`}
+      accessibilityLabel={`Open cart, ${shown} ${shown === 1 ? 'item' : 'items'}`}
       onPress={onPress}
       hitSlop={spacing.sm}
       style={styles.container}
+      onLayout={() => {
+        // Register the landing target in window coordinates — the same space
+        // measureInWindow reports for sources. Re-registers on every layout
+        // change (rotation, header resize).
+        containerRef.current?.measureInWindow((x, y, width, height) =>
+          registerCartTarget({ x, y, width, height }),
+        );
+      }}
     >
       <Ionicons name="cart-outline" size={26} color={colors.primary} />
-      {count > 0 && (
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{count > 99 ? '99+' : count}</Text>
-        </View>
+      {shown > 0 && (
+        <Animated.View style={[styles.badge, { transform: [{ scale }] }]}>
+          <Text style={styles.badgeText}>{shown > 99 ? '99+' : shown}</Text>
+        </Animated.View>
       )}
     </Pressable>
   );

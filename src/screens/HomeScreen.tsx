@@ -1,5 +1,5 @@
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { useCallback, useState } from 'react';
+import { RefObject, useCallback, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -8,6 +8,8 @@ import {
   TextInput,
   View,
 } from 'react-native';
+
+import { useFlyToCart } from '../animation/useFlyToCart';
 
 import BookCard, { BOOK_CARD_HEIGHT } from '../components/BookCard';
 import EmptyView from '../components/EmptyView';
@@ -28,15 +30,23 @@ export default function HomeScreen({ navigation }: Props) {
     input.trim() === '' ? DEFAULT_BROWSE_QUERY : input.trim(),
   );
   const addBook = useCartStore((s) => s.addBook);
+  const flyToCart = useFlyToCart();
 
   const openDetails = useCallback(
     (book: Book) => navigation.navigate('BookDetails', { bookId: book.id, title: book.title }),
     [navigation],
   );
 
-  // The cart updates on tap, always — the Phase 5 animation is decorative and
-  // hooks in around this call without ever replacing it.
-  const handleAddToCart = useCallback((book: Book) => addBook(book), [addBook]);
+  // The cart updates on tap, FIRST and synchronously — the flight is
+  // decorative and every one of its failure modes degrades to "badge just
+  // updates instantly". If the animation throws, the cart is still right.
+  const handleAddToCart = useCallback(
+    (book: Book, coverRef: RefObject<View | null>) => {
+      addBook(book);
+      flyToCart(coverRef, book.coverUrl);
+    },
+    [addBook, flyToCart],
+  );
 
   const renderContent = () => {
     if (state.status === 'loading') {

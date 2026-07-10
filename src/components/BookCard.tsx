@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { RefObject, memo, useRef } from 'react';
 import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import PriceTag from './PriceTag';
@@ -10,10 +10,13 @@ export const BOOK_CARD_HEIGHT = 116; // fixed → FlatList getItemLayout (Phase 
 interface Props {
   book: Book;
   onPress: (book: Book) => void;
-  onAddToCart: (book: Book) => void;
+  /** coverRef points at the cover element — the flying ghost's source rect. */
+  onAddToCart: (book: Book, coverRef: RefObject<View | null>) => void;
 }
 
 function BookCard({ book, onPress, onAddToCart }: Props) {
+  const coverRef = useRef<View>(null);
+
   return (
     <Pressable
       accessibilityRole="button"
@@ -21,15 +24,17 @@ function BookCard({ book, onPress, onAddToCart }: Props) {
       onPress={() => onPress(book)}
       style={({ pressed }) => [styles.card, pressed && styles.pressed]}
     >
-      {book.coverUrl !== null ? (
-        <Image source={{ uri: book.coverUrl }} style={styles.cover} resizeMode="cover" />
-      ) : (
-        <View style={[styles.cover, styles.coverFallback]}>
-          <Text style={styles.coverFallbackText} numberOfLines={3}>
-            {book.title}
-          </Text>
-        </View>
-      )}
+      <View ref={coverRef} collapsable={false} style={styles.cover}>
+        {book.coverUrl !== null ? (
+          <Image source={{ uri: book.coverUrl }} style={styles.coverImage} resizeMode="cover" />
+        ) : (
+          <View style={[styles.coverImage, styles.coverFallback]}>
+            <Text style={styles.coverFallbackText} numberOfLines={3}>
+              {book.title}
+            </Text>
+          </View>
+        )}
+      </View>
       <View style={styles.info}>
         <Text style={styles.title} numberOfLines={2}>
           {book.title}
@@ -43,7 +48,7 @@ function BookCard({ book, onPress, onAddToCart }: Props) {
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={`Add ${book.title} to cart`}
-            onPress={() => onAddToCart(book)}
+            onPress={() => onAddToCart(book, coverRef)}
             style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
             hitSlop={spacing.sm}
           >
@@ -71,7 +76,13 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   pressed: { opacity: 0.75 },
-  cover: { width: 64, height: '100%', borderRadius: radii.sm, backgroundColor: colors.border },
+  cover: { width: 64, height: '100%' },
+  coverImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: radii.sm,
+    backgroundColor: colors.border,
+  },
   coverFallback: { alignItems: 'center', justifyContent: 'center', padding: spacing.xs },
   coverFallbackText: { ...type.caption, color: colors.textMuted, textAlign: 'center' },
   info: { flex: 1, justifyContent: 'space-between' },

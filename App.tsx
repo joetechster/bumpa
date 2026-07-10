@@ -3,6 +3,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { PaystackProvider } from 'react-native-paystack-webview';
 
+import { FlightProvider } from './src/animation/flightController';
+import FlyingCartOverlay from './src/animation/FlyingCartOverlay';
 import { PAYSTACK_PUBLIC_KEY } from './src/config/env';
 import RootNavigator from './src/navigation/RootNavigator';
 import { rehydrateCart, startCartPersistence } from './src/store/cartPersistence';
@@ -21,10 +23,15 @@ export default function App() {
 
   return (
     <PaystackProvider publicKey={PAYSTACK_PUBLIC_KEY} currency="NGN">
-      <NavigationContainer>
-        <RootNavigator />
-        <StatusBar style="auto" />
-      </NavigationContainer>
+      <FlightProvider>
+        <NavigationContainer>
+          <RootNavigator />
+          <StatusBar style="auto" />
+        </NavigationContainer>
+        {/* Sibling of the navigator: ghosts fly above every screen, clipped
+            by nothing. pointerEvents="none" inside. */}
+        <FlyingCartOverlay />
+      </FlightProvider>
     </PaystackProvider>
   );
 }

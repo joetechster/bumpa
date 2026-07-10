@@ -50,3 +50,13 @@ animation constants in one file; checkout built before animation.
 | D23 | Reference generation | client UUID / timestamp+random / derived from cart | Derived collides on repeat purchases (skill forbids); uuid lib adds a dep for no gain | **`bn_<Date.now()>_<random36>`, fresh per payment attempt** | No | 2026-07-10 |
 | D24 | onCancel UX | share the error screen / distinct neutral note | Cancel is a user decision, not a failure; conflating reads as careless (skill) | **Cancel returns to the form with a neutral 'cart untouched' note; error gets a distinct retry screen** | No | 2026-07-10 |
 | D25 | Checkout email | require sign-in / ask at checkout | No auth in scope; Paystack requires an email for receipts | **Single validated email field on the checkout form** | No | 2026-07-10 |
+
+## Phase 5 — animation decisions
+
+| ID | Decision | Options | Trade-off | Ruling | PROV? | Date |
+|---|---|---|---|---|---|---|
+| D26 | Source-rect measurement | worklet measure() / onLayout capture / measureInWindow / layout-registry | One-shot pre-flight measurement doesn't need the UI thread; measureInWindow returns window coords (scroll-adjusted, same space as the target registry) with no worklet plumbing. Per-frame work stays 100% in worklets | **measureInWindow for the tapped cover; layout-registry (context ref) for the cart icon, registered on the badge's onLayout** | No | 2026-07-10 |
+| D27 | Motion driver | two withTimings (x,y) / one linear progress + in-worklet easing | Two timings need two terminal callbacks and can desync under interruption; one driver gives exactly one runOnJS and derives x/y/scale/opacity per-frame in the worklet | **Single linear withTiming 0→1; decoupled axis easings computed in-worklet (x ease-out, y ease-in → arc)** | No | 2026-07-10 |
+| D28 | Badge lag semantics | badge tracks store / displayed = store − inFlight | The brief wants the count to be the payoff of the landing; the store must still be instantly correct | **displayedCount(true, inFlight) with floor at 0; store NEVER waits for animation** | No | 2026-07-10 |
+| D29 | Rapid taps | queue flights / overlap | Skill mandates overlap; queueing lags the badge unboundedly | **Overlap: each flight has its own id + shared value; landing removes by id (idempotent)** | No | 2026-07-10 |
+
