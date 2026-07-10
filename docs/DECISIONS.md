@@ -30,3 +30,14 @@ animation constants in one file; checkout built before animation.
 | D13 | Reanimated babel plugin | manual babel.config.js / babel-preset-expo auto | babel-preset-expo auto-adds `react-native-worklets/plugin` when installed (verified in `build/configs/expo.js:109`) — a manual config risks double-adding | **No babel.config.js; rely on babel-preset-expo** | No | 2026-07-10 |
 | D14 | App config source | app.json / app.config.ts | Two sources drift; TS config is typed | **app.config.ts only, app.json deleted** | No | 2026-07-10 |
 | D15 | RNTL v14 async API | pin RNTL v13 (sync render) / adopt v14 (`await render`) | v14 is what a fresh clone installs; async render matches React 19 concurrent | **Adopt RNTL v14; every render/unmount/rerender awaited** | No | 2026-07-10 |
+
+## Phase 2–4 — implementation decisions
+
+| ID | Decision | Options | Trade-off | Ruling | PROV? | Date |
+|---|---|---|---|---|---|---|
+| D16 | Open Library redirect stubs | ignore / follow one hop / follow chains | Live data contains works whose payload is `type:/type/redirect` + `location` (found while sampling; e.g. OL45883W→OL45804W). Chains risk loops | **Follow exactly one hop; a second redirect → `malformed`** | No | 2026-07-10 |
+| D17 | API error transport | throw ApiError objects / return `Result<T>` | Throwing non-Error values fights TS and stack traces; Result makes every branch typed and testable | **`Result<T>` returns; caller-initiated aborts re-throw AbortError (lifecycle, not UI error)** | No | 2026-07-10 |
+| D18 | Timeout mechanism | `AbortSignal.any`+`AbortSignal.timeout` / hand-rolled controller | `AbortSignal.any` support on Hermes is uncertain and unverifiable here | **Hand-rolled: internal controller + setTimeout, caller signal forwarded** | No | 2026-07-10 |
+| D19 | Runtime payload validation | zod / hand-rolled type guards | zod is pure JS (allowed) but hides the mechanics; guards are ~20 lines | **Hand-rolled `isOLSearchResponse` / `isOLWork` guards** | No | 2026-07-10 |
+| D20 | Author names on details | route-param passthrough / resolve via /authors/*.json | Works endpoint returns refs only. Param passthrough breaks deep-linking; author fetches are parallel and degrade gracefully | **Resolve up to 3 author names in `getBookById`, best-effort** | No | 2026-07-10 |
+| D21 | Decrement at quantity 1 | floor at 1 / remove the line | Removal is the common cart idiom and keeps the stepper self-sufficient; floor-at-1 forces a separate delete affordance | **Decrementing at 1 removes the line; `setQuantity(id, 0)` removes** | **PROVISIONAL** (user was offline; reversal = one branch in cartStore + stepper) | 2026-07-10 |

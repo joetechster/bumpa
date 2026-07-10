@@ -6,9 +6,9 @@ Re-orient here after a context clear. Build order: 0, 1, 2, 3, 4, **6, 5**, 7, 8
 |---|---|---|---|
 | 0 Plan | ✅ done | n/a | All 11 decisions ruled by user (DECISIONS.md) |
 | 1 Scaffold | ✅ done | test ✅ lint ✅ tsc ✅ doctor ✅ | Expo SDK 57 / RN 0.86 / React 19.2, RNTL v14 (async render!), Reanimated 4 (worklets mock in jest.setup.ts) |
-| 2 API layer | ⬜ next | | Open Library client, error union, normalise, price hash |
-| 3 Fetch hook | ⬜ | | |
-| 4 Screens+cart | ⬜ | | |
+| 2 API layer | ✅ done | test ✅ lint ✅ tsc ✅ doctor ✅ | Live-verified fixtures; redirect stubs handled (D16); Result<T> transport (D17) |
+| 3 Fetch hook | ✅ done | test ✅ lint ✅ tsc ✅ doctor ✅ | useReducer machine; race + unmount cases tested; fetcher must be useCallback-stable |
+| 4 Screens+cart | 🔨 in progress | | store/persistence/debounce written; screens+search hook+tests next |
 | 6 Checkout | ⬜ | | before Phase 5 |
 | 5 Animation | ⬜ | | |
 | 7 Test sweep | ⬜ | | coverage: 85/80 global, 100% money+cart |
