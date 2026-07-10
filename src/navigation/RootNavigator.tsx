@@ -1,6 +1,7 @@
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import type { RootStackParamList } from './types';
+import CartBadge from '../components/CartBadge';
 import BookDetailsScreen from '../screens/BookDetailsScreen';
 import CartScreen from '../screens/CartScreen';
 import CheckoutScreen from '../screens/CheckoutScreen';
@@ -12,11 +13,14 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 export default function RootNavigator() {
   return (
     <Stack.Navigator
-      screenOptions={{
+      screenOptions={({ navigation }) => ({
         headerTintColor: colors.primary,
         headerTitleStyle: { color: colors.text },
         contentStyle: { backgroundColor: colors.background },
-      }}
+        // The cart badge lives in the header on every screen except the cart
+        // itself — it is also the flying animation's landing target (Phase 5).
+        headerRight: () => <CartBadge onPress={() => navigation.navigate('Cart')} />,
+      })}
     >
       <Stack.Screen name="Home" component={HomeScreen} options={{ title: 'The Book Nook' }} />
       <Stack.Screen
@@ -24,7 +28,11 @@ export default function RootNavigator() {
         component={BookDetailsScreen}
         options={({ route }) => ({ title: route.params.title ?? 'Book details' })}
       />
-      <Stack.Screen name="Cart" component={CartScreen} options={{ title: 'Your cart' }} />
+      <Stack.Screen
+        name="Cart"
+        component={CartScreen}
+        options={{ title: 'Your cart', headerRight: undefined }}
+      />
       <Stack.Screen name="Checkout" component={CheckoutScreen} options={{ title: 'Checkout' }} />
     </Stack.Navigator>
   );

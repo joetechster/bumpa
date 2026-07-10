@@ -5,6 +5,12 @@ jest.mock('react-native-worklets', () => require('react-native-worklets/lib/modu
 // Official Reanimated Jest setup — installs the animation test utils.
 require('react-native-reanimated').setUpTests();
 
+// AsyncStorage has no native module under Jest; its package ships this mock
+// (in-memory, jest.fn-wrapped, resettable via AsyncStorage.clear()).
+jest.mock('@react-native-async-storage/async-storage', () =>
+  require('@react-native-async-storage/async-storage/jest/async-storage-mock'),
+);
+
 // The suite must be silent. An unexpected console.error or console.warn fails the
 // test that produced it — this is the only automated catch for React lifecycle
 // warnings ("state update on unmounted component"), which the assessment grades.
