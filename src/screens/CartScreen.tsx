@@ -53,7 +53,10 @@ export default function CartScreen({ navigation }: Props) {
           />
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel={`Remove ${item.book.title} from cart`}
+            // "all" distinguishes this from the stepper's minus, whose label
+            // at quantity 1 is "Remove <title> from cart" — a screen-reader
+            // user must be able to tell the two apart.
+            accessibilityLabel={`Remove all ${item.book.title} from cart`}
             onPress={() => removeBook(item.book.id)}
             hitSlop={spacing.xs}
           >
