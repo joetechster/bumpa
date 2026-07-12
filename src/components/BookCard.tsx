@@ -1,0 +1,105 @@
+import { RefObject, memo, useRef } from 'react';
+import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+
+import PriceTag from './PriceTag';
+import type { Book } from '../domain/book';
+import { colors, radii, shadows, spacing, type } from '../theme/theme';
+
+// Fixed → FlatList getItemLayout (Phase 8). If the card's padding, cover size
+// or type sizes change, this number must change with them or the search list's
+// scroll offsets desync. HomeScreen derives its offsets from exactly this.
+export const BOOK_CARD_HEIGHT = 132;
+
+interface Props {
+  book: Book;
+  onPress: (book: Book) => void;
+  /** coverRef points at the cover element - the flying ghost's source rect. */
+  onAddToCart: (book: Book, coverRef: RefObject<View | null>) => void;
+}
+
+function BookCard({ book, onPress, onAddToCart }: Props) {
+  const coverRef = useRef<View>(null);
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={`${book.title}, view details`}
+      onPress={() => onPress(book)}
+      style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+    >
+      <View ref={coverRef} collapsable={false} style={styles.cover}>
+        {book.coverUrl !== null ? (
+          <Image source={{ uri: book.coverUrl }} style={styles.coverImage} resizeMode="cover" />
+        ) : (
+          <View style={[styles.coverImage, styles.coverFallback]}>
+            <Text style={styles.coverFallbackText} numberOfLines={3}>
+              {book.title}
+            </Text>
+          </View>
+        )}
+      </View>
+      <View style={styles.info}>
+        <Text style={styles.title} numberOfLines={2}>
+          {book.title}
+        </Text>
+        <Text style={styles.author} numberOfLines={1}>
+          {book.authors.length > 0 ? book.authors.join(', ') : 'Unknown author'}
+        </Text>
+        <Text style={styles.rating}>★ {book.rating.toFixed(1)}</Text>
+        <View style={styles.bottomRow}>
+          <PriceTag priceKobo={book.priceKobo} />
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={`Add ${book.title} to cart`}
+            onPress={() => onAddToCart(book, coverRef)}
+            style={({ pressed }) => [styles.addButton, pressed && styles.pressed]}
+            hitSlop={spacing.sm}
+          >
+            <Text style={styles.addButtonText}>Add to cart</Text>
+          </Pressable>
+        </View>
+      </View>
+    </Pressable>
+  );
+}
+
+// memo: rows are pure functions of the book + stable handlers; without it the
+// whole window re-renders on every keystroke of the search box.
+export default memo(BookCard);
+
+const styles = StyleSheet.create({
+  card: {
+    height: BOOK_CARD_HEIGHT,
+    flexDirection: 'row',
+    backgroundColor: colors.surface,
+    borderRadius: radii.lg,
+    padding: spacing.sm,
+    // marginVertical is the `spacing.xs * 2` in HomeScreen's getItemLayout.
+    marginHorizontal: spacing.md,
+    marginVertical: spacing.xs,
+    gap: spacing.md,
+    ...shadows.card,
+  },
+  pressed: { opacity: 0.75 },
+  cover: { width: 78, height: '100%' },
+  coverImage: {
+    width: '100%',
+    height: '100%',
+    borderRadius: radii.md,
+    backgroundColor: colors.tan,
+  },
+  coverFallback: { alignItems: 'center', justifyContent: 'center', padding: spacing.xs },
+  coverFallbackText: { ...type.caption, color: colors.text, textAlign: 'center' },
+  info: { flex: 1, justifyContent: 'space-between', paddingVertical: spacing.xs },
+  title: { ...type.heading, fontSize: 16, color: colors.text },
+  author: { ...type.caption, color: colors.textMuted, marginTop: spacing.xs },
+  rating: { ...type.caption, color: colors.accent, marginTop: spacing.xs },
+  bottomRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  addButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.sm,
+    borderRadius: radii.pill,
+  },
+  addButtonText: { ...type.caption, fontWeight: '600', color: colors.surface },
+});
